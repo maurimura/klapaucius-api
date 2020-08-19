@@ -16,12 +16,12 @@ struct Item {
 }
 
 trait Sum {
-    fn concat(&self) -> i64;
+    fn extract(&self) -> i64;
     fn empty() -> u8;
 }
 
 impl Sum for Item {
-    fn concat(&self) -> i64 {
+    fn extract(&self) -> i64 {
         match &self.kind {
             Entry::In => self.amount as i64,
             Entry::Out => -(self.amount as i64)
@@ -39,7 +39,7 @@ struct Ledger {
 
 impl Ledger {
     fn get_total(&self) -> i64 {
-        self.entries.iter().map(|item| { item.concat() }).sum()
+        self.entries.iter().map(|item| { item.extract() }).sum()
     }
 }
 
