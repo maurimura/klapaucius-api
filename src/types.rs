@@ -1,18 +1,21 @@
 use std::vec::Vec;
 
-struct _User {
-    id: String
+struct _User<'a> {
+    id: &'a str
 }
 #[derive(Debug)]
 enum Entry {
     In,
     Out
 }
+type ItemId = String;
 #[derive(Debug)]
 struct Item {
+    id: ItemId,
     kind: Entry,
     amount: u32,
-    description: Option<String>
+    description: Option<String>,
+    date: String
 }
 
 trait Sum {
@@ -33,6 +36,30 @@ impl Sum for Item {
     }
 }
 
+
+impl Item {
+    pub fn new(entry: Entry) -> Item {
+        Item {
+            amount: 0,
+            description: None,
+            date: "Now".to_string(),
+            id: "ID".to_string(),
+            kind: entry
+        }
+    }
+    pub fn amount(mut self, amount: u32) -> Self {
+        self.amount = amount;
+        self
+    }
+    pub fn description(mut self, description: &str) -> Self {
+        self.description = Some(description.to_string());
+        self
+    }
+    pub fn date(mut self, date: &str) -> Self {
+        self.date = date.to_string();
+        self
+    }
+}
 struct Ledger {
     entries: Vec<Item>
 }
@@ -43,18 +70,10 @@ impl Ledger {
     }
 }
 
-pub fn run(){
-    let input = Item {
-        kind: Entry::In,
-        amount: 17200,
-        description: Some("Some Input".to_string())
-    };
 
-    let output = Item {
-        kind: Entry::Out,
-        amount: 200,
-        description: Some("Some Ouput".to_string())
-    };
+pub fn run(){
+    let input = Item::new(Entry::In).amount(17200).description("Some Input");
+    let output = Item::new(Entry::Out).amount(200).description("Some Output");
     let ledger = Ledger {
         entries: vec![input, output]
     };
@@ -66,23 +85,15 @@ pub fn run(){
 mod tests {
     use super::*;
     #[test]
+
+    fn build_item_without_description() {
+
+    }
     fn sum() {
         let mocked_input = vec![
-            Item {
-                kind: Entry::In,
-                amount: 4200,
-                description: Some("Falopa".to_string())
-            },
-            Item {
-                kind: Entry::Out,
-                amount: 200,
-                description: Some("Some Ouput".to_string())
-            },
-            Item {
-                kind: Entry::In,
-                amount: 2000,
-                description: Some("Some Input".to_string())
-            },
+            Item::new(Entry::In).amount(4200).description("Some Input"),
+            Item::new(Entry::Out).amount(200).description("Some Output"),
+            Item::new(Entry::In).amount(2000).description("Some Input"),
         ];
 
         let ledger = Ledger {
