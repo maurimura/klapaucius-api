@@ -9,6 +9,16 @@ impl Ledger {
             entries
         }
     }
+
+    pub fn add(mut self, item: Item) -> Self {
+        self.entries.push(item);
+        self
+    }
+    
+    pub fn update(mut self, updated_item: Item) {
+        // for 
+    }
+
     pub fn get_total(&self) -> i64 {
         self.entries.iter().map(|item| { item.extract() }).sum()
     }
@@ -17,6 +27,29 @@ impl Ledger {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn add(){
+        let mut ledger = Ledger::new(vec![]);
+        assert_eq!(ledger.get_total(), 0);
+        assert_eq!(ledger.entries.len(), 0);
+
+        let mocked_amount = 420;
+        let mocked_item = Item::new(Entry::In).amount(mocked_amount);
+        let expected_id = mocked_item.id.clone();
+        let expected_amount = mocked_item.amount;
+        ledger.add(mocked_item);
+
+        assert_eq!(ledger.entries.len(), 1);
+        assert_eq!(ledger.entries[0].id, expected_id);
+        assert_eq!(ledger.entries[0].amount, expected_amount);
+        assert_eq!(ledger.get_total(), expected_amount as i64);
+    }
+    #[test]
+    fn update(){
+        let mocked_item = Item::new(Entry::In).amount(420);
+        let mut ledger = Ledger::new(vec![mocked_item]);
+    }
+
     #[test]
     fn sum() {
         let mocked_input = vec![
