@@ -2,13 +2,13 @@
 
 use crate::types::{Item, Entry};
 
-impl Item {
-    pub fn new(entry: Entry) -> Item {
+impl <'a>Item<'a> {
+    pub fn new(entry: Entry) -> Item<'a> {
         Item {
             amount: 0,
             description: None,
-            date: "Now".to_string(),
-            id: "ID".to_string(),
+            date: "Now",
+            id: "ID",
             kind: entry
         }
     }
@@ -16,12 +16,12 @@ impl Item {
         self.amount = amount;
         self
     }
-    pub fn description(mut self, description: &str) -> Self {
-        self.description = Some(description.to_string());
+    pub fn description(mut self, description: &'a str) -> Self {
+        self.description = Some(description);
         self
     }
-    pub fn date(mut self, date: &str) -> Self {
-        self.date = date.to_string();
+    pub fn date(mut self, date: &'a str) -> Self {
+        self.date = date;
         self
     }
 }
@@ -31,7 +31,7 @@ pub trait Sum {
     fn empty() -> u8;
 }
 
-impl Sum for Item {
+impl Sum for Item<'_> {
     fn extract(&self) -> i64 {
         match &self.kind {
             Entry::In => self.amount as i64,
@@ -54,7 +54,7 @@ mod tests {
         let expected_item = Item {
             id: mocked_item.id,
             kind: Entry::In,
-            date: "Now".to_string(),
+            date: "Now",
             amount: 0,
             description: None
         };
@@ -79,9 +79,9 @@ mod tests {
         let expected_item = Item {
             id: mocked_item.id,
             kind: Entry::Out,
-            date: mocked_date.to_string(),
+            date: mocked_date,
             amount: mocked_amount,
-            description: Some(mocked_description.to_string())
+            description: Some(mocked_description)
         };
 
         assert_eq!(mocked_item.date, expected_item.date);

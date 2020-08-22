@@ -3,20 +3,22 @@ use std::vec::Vec;
 use crate::types::{Ledger, Item, Entry};
 use crate::item::{Sum};
 
-impl Ledger {
-    pub fn new(entries: Vec<Item>) -> Self {
+impl <'a>Ledger<'a> {
+    pub fn new(entries: &'a Vec<Item<'a>>) -> Self {
         Ledger {
-            entries
+            entries        
         }
     }
 
-    pub fn add(mut self, item: Item) -> Self {
-        self.entries.push(item);
+    pub fn add(mut self, item: Item<'a>) -> Self {
+        let mut new_entries = self.entries.clone();
+        new_entries.push(item);
+        self.entries = &new_entries;
         self
     }
     
     pub fn update(mut self, updated_item: Item) {
-        // for 
+        self.entries = self.entries 
     }
 
     pub fn get_total(&self) -> i64 {
@@ -29,7 +31,7 @@ mod tests {
     use super::*;
     #[test]
     fn add(){
-        let mut ledger = Ledger::new(vec![]);
+        let ledger = Ledger::new(&vec![]);
         assert_eq!(ledger.get_total(), 0);
         assert_eq!(ledger.entries.len(), 0);
 
@@ -38,21 +40,20 @@ mod tests {
         let expected_id = mocked_item.id.clone();
         let expected_amount = mocked_item.amount;
         ledger.add(mocked_item);
-
-        assert_eq!(ledger.entries.len(), 1);
-        assert_eq!(ledger.entries[0].id, expected_id);
-        assert_eq!(ledger.entries[0].amount, expected_amount);
+        let expected_item = ledger.entries[0];
+        assert_eq!(expected_item.id, expected_id);
+        assert_eq!(expected_item.amount, expected_amount);
         assert_eq!(ledger.get_total(), expected_amount as i64);
     }
     #[test]
     fn update(){
         let mocked_item = Item::new(Entry::In).amount(420);
-        let mut ledger = Ledger::new(vec![mocked_item]);
+        let mut ledger = Ledger::new(&vec![mocked_item]);
     }
 
     #[test]
     fn sum() {
-        let mocked_input = vec![
+        let mocked_input = &vec![
             Item::new(Entry::In).amount(4200).description("Some Input"),
             Item::new(Entry::Out).amount(200).description("Some Output"),
             Item::new(Entry::In).amount(2000).description("Some Input"),
@@ -67,7 +68,7 @@ mod tests {
     }
     #[test]
     fn negative_sum() {
-        let mocked_input = vec![
+        let mocked_input = &vec![
             Item::new(Entry::Out).amount(200).description("Some Output"),
         ];
 

@@ -3,22 +3,22 @@ struct _User {
     id: String
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum Entry {
     In,
     Out
 }
-type ItemId = String;
-#[derive(Debug)]
-pub struct Item {
-    pub id: ItemId,
+type ItemId = str;
+#[derive(Debug, Copy, Clone)]
+pub struct Item<'a> {
+    pub id: &'a ItemId,
     pub kind: Entry,
     pub amount: u32,
-    pub description: Option<String>,
-    pub date: String
+    pub description: Option<&'a str>,
+    pub date: &'a str
 }
 
-
-pub struct Ledger {
-    pub entries: Vec<Item>
+#[derive(Copy, Clone)]
+pub struct Ledger<'a> {
+    pub entries: &'a Vec<Item<'a>>
 }
