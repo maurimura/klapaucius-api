@@ -3,22 +3,38 @@ use std::vec::Vec;
 use crate::types::{Ledger, Item, Entry};
 use crate::item::{Sum};
 
-impl <'a>Ledger<'a> {
-    pub fn new(entries: &'a Vec<Item<'a>>) -> Self {
+impl Ledger {
+    
+    pub fn new(entries: Vec<Item>) -> Self {
         Ledger {
             entries        
         }
     }
 
-    pub fn add(mut self, item: Item<'a>) -> Self {
-        let mut new_entries = self.entries.clone();
-        new_entries.push(item);
-        self.entries = &new_entries;
+    pub fn add(mut self, item: Item) -> Self {
+        self.entries.push(item);
         self
     }
-    
-    pub fn update(mut self, updated_item: Item) {
-        self.entries = self.entries 
+
+    pub fn update(mut self, updated_item: Item) -> Self {
+        self.entries = self.entries.into_iter().map(|entry| {
+            if entry.id == updated_item.id {
+                updated_item.clone()
+            } else {
+                entry
+            }
+        }).collect();
+        
+        self
+    }
+
+    pub fn delete(mut self, item_to_delete: Item) -> Self {
+        self.entries = self.entries
+                        .into_iter()
+                        .filter(|item| {
+                            item.id != item_to_delete.id                               
+                        }).collect();
+        self
     }
 
     pub fn get_total(&self) -> i64 {
@@ -31,29 +47,55 @@ mod tests {
     use super::*;
     #[test]
     fn add(){
-        let ledger = Ledger::new(&vec![]);
+        let ledger = Ledger::new(vec![]);
         assert_eq!(ledger.get_total(), 0);
         assert_eq!(ledger.entries.len(), 0);
 
         let mocked_amount = 420;
         let mocked_item = Item::new(Entry::In).amount(mocked_amount);
+        let ledger = ledger.add(mocked_item.clone());
         let expected_id = mocked_item.id.clone();
         let expected_amount = mocked_item.amount;
-        ledger.add(mocked_item);
-        let expected_item = ledger.entries[0];
-        assert_eq!(expected_item.id, expected_id);
-        assert_eq!(expected_item.amount, expected_amount);
-        assert_eq!(ledger.get_total(), expected_amount as i64);
+
+        assert_eq!(ledger.entries[0].id, expected_id);
+        assert_eq!(ledger.entries[0].amount, expected_amount);
     }
     #[test]
     fn update(){
         let mocked_item = Item::new(Entry::In).amount(420);
-        let mut ledger = Ledger::new(&vec![mocked_item]);
+        let mocked_item_out = Item::new(Entry::Out).amount(20);
+        let ledger = Ledger::new(vec![mocked_item, mocked_item_out.clone()]);
+        assert_eq!(ledger.get_total(), 400);
+
+        let updated_item = mocked_item_out.amount(200);
+        let ledger = ledger.update(updated_item.clone());
+
+        assert_eq!(ledger.get_total(), 220);
+
+        ledger.entries.iter().for_each(|item| {
+            if item.id == updated_item.id {
+                assert_eq!(item.amount, 200)
+            }
+        })
     }
 
     #[test]
+    fn delete(){
+        let mocked_item = Item::new(Entry::In).amount(420);
+        let mocked_item_out = Item::new(Entry::Out).amount(20);
+        let ledger = Ledger::new(vec![mocked_item.clone(), mocked_item_out]);
+
+        let ledger = ledger.delete(mocked_item.clone());
+
+        assert_eq!(ledger.get_total(), -20);
+
+        ledger.entries.iter().for_each(|item| {
+            assert_ne!(item.id, mocked_item.id)
+        })
+    }
+    #[test]
     fn sum() {
-        let mocked_input = &vec![
+        let mocked_input = vec![
             Item::new(Entry::In).amount(4200).description("Some Input"),
             Item::new(Entry::Out).amount(200).description("Some Output"),
             Item::new(Entry::In).amount(2000).description("Some Input"),
@@ -68,7 +110,7 @@ mod tests {
     }
     #[test]
     fn negative_sum() {
-        let mocked_input = &vec![
+        let mocked_input = vec![
             Item::new(Entry::Out).amount(200).description("Some Output"),
         ];
 

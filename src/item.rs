@@ -1,14 +1,20 @@
 
-
+use std::sync::atomic::{AtomicUsize, Ordering};
 use crate::types::{Item, Entry};
 
-impl <'a>Item<'a> {
-    pub fn new(entry: Entry) -> Item<'a> {
+
+fn get_id() -> usize {
+    static COUNTER:AtomicUsize = AtomicUsize::new(1);
+    COUNTER.fetch_add(1, Ordering::Relaxed)
+}
+
+impl Item {
+    pub fn new(entry: Entry) -> Item {
         Item {
             amount: 0,
             description: None,
-            date: "Now",
-            id: "ID",
+            date: "Now".to_string(),
+            id: get_id(),
             kind: entry
         }
     }
@@ -16,12 +22,12 @@ impl <'a>Item<'a> {
         self.amount = amount;
         self
     }
-    pub fn description(mut self, description: &'a str) -> Self {
-        self.description = Some(description);
+    pub fn description(mut self, description: &str) -> Self {
+        self.description = Some(description.to_string());
         self
     }
-    pub fn date(mut self, date: &'a str) -> Self {
-        self.date = date;
+    pub fn date(mut self, date: &str) -> Self {
+        self.date = date.to_string();
         self
     }
 }
@@ -31,7 +37,7 @@ pub trait Sum {
     fn empty() -> u8;
 }
 
-impl Sum for Item<'_> {
+impl Sum for Item {
     fn extract(&self) -> i64 {
         match &self.kind {
             Entry::In => self.amount as i64,
@@ -54,7 +60,7 @@ mod tests {
         let expected_item = Item {
             id: mocked_item.id,
             kind: Entry::In,
-            date: "Now",
+            date: "Now".to_string(),
             amount: 0,
             description: None
         };
@@ -79,9 +85,9 @@ mod tests {
         let expected_item = Item {
             id: mocked_item.id,
             kind: Entry::Out,
-            date: mocked_date,
+            date: mocked_date.to_string(),
             amount: mocked_amount,
-            description: Some(mocked_description)
+            description: Some(mocked_description.to_string())
         };
 
         assert_eq!(mocked_item.date, expected_item.date);
