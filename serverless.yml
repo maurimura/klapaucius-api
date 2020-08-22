@@ -84,6 +84,13 @@ functions:
 #    environment:
 #      variable2: value2
 
+  world:
+    handler: world
+    events:
+      - http:
+          path: /
+          method: get
+
 # you can add CloudFormation resource templates here
 #resources:
 #  Resources:
