@@ -1,7 +1,8 @@
 
 use serde::{Serialize, Deserialize};
-struct _User {
-    id: String
+type UserId = String;
+struct User {
+    id: UserId
 }
 
 #[derive(Debug, PartialEq, Copy, Clone, Serialize, Deserialize, )]
@@ -21,5 +22,6 @@ pub struct Item {
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct Ledger {
+    pub user_id: UserId,
     pub entries: Vec<Item>
 }

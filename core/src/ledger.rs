@@ -7,6 +7,7 @@ impl Ledger {
     
     pub fn new(entries: Vec<Item>) -> Self {
         Ledger {
+            user_id: "0".to_string(),
             entries        
         }
     }
@@ -102,6 +103,7 @@ mod tests {
         ];
 
         let ledger = Ledger {
+            user_id: "0".to_string(),
             entries: mocked_input
         };
 
@@ -115,6 +117,7 @@ mod tests {
         ];
 
         let ledger = Ledger {
+            user_id: "0".to_string(),
             entries: mocked_input
         };
 
